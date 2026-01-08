@@ -1,11 +1,13 @@
 
+/// <reference types="vite/client" />
 import { GoogleGenAI, Modality, GenerateContentResponse } from "@google/genai";
 
 const getAIClient = () => {
-  if (!process.env.API_KEY) {
+  const apiKey = import.meta.env.VITE_API_KEY;
+  if (!apiKey) {
     throw new Error("API Key is missing.");
   }
-  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+  return new GoogleGenAI({ apiKey: apiKey });
 };
 
 /**
