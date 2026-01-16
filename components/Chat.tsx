@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect, memo } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Message } from '../types';
 
 interface ChatProps {
@@ -11,13 +12,20 @@ interface ChatProps {
 
 const MessageBubble = memo(({ msg }: { msg: Message }) => (
   <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
-    <div className={`max-w-[85%] rounded-2xl p-4 shadow-lg ${
-      msg.role === 'user' 
-        ? 'bg-emerald-600 text-white rounded-tr-none border border-emerald-500/30' 
+    <div className={`max-w-[85%] rounded-2xl p-4 shadow-lg ${msg.role === 'user'
+        ? 'bg-emerald-600 text-white rounded-tr-none border border-emerald-500/30'
         : 'bg-slate-800 border border-slate-700 text-slate-200 rounded-tl-none'
-    }`}>
-      <div className="whitespace-pre-wrap text-sm leading-relaxed prose-invert prose-emerald">
-        {msg.content || (msg.role === 'assistant' ? 'Thinking...' : '')}
+      }`}>
+      <div className="text-sm leading-relaxed prose prose-invert prose-emerald prose-sm max-w-none">
+        {msg.content ? (
+          msg.role === 'assistant' ? (
+            <ReactMarkdown>{msg.content}</ReactMarkdown>
+          ) : (
+            <span className="whitespace-pre-wrap">{msg.content}</span>
+          )
+        ) : (
+          msg.role === 'assistant' ? 'Thinking...' : ''
+        )}
       </div>
       <div className={`text-[9px] mt-2 opacity-60 uppercase font-bold tracking-widest ${msg.role === 'user' ? 'text-emerald-100' : 'text-slate-500'}`}>
         {msg.role === 'user' ? 'Transmit' : 'Synthesized'} • {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -25,6 +33,8 @@ const MessageBubble = memo(({ msg }: { msg: Message }) => (
     </div>
   </div>
 ));
+
+MessageBubble.displayName = 'MessageBubble';
 
 export const Chat: React.FC<ChatProps> = ({ messages, onSendMessage, onReset, isProcessing }) => {
   const [input, setInput] = useState('');
@@ -50,20 +60,25 @@ export const Chat: React.FC<ChatProps> = ({ messages, onSendMessage, onReset, is
       <div className="px-6 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800/30">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
-            <i className="fa-solid fa-brain text-emerald-500 text-lg"></i>
+            <i className="fa-solid fa-brain text-emerald-500 text-lg" aria-hidden="true"></i>
           </div>
           <div>
             <h2 className="font-semibold text-slate-100">Brain Terminal</h2>
             <div className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`}></span>
+              <span className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} aria-hidden="true"></span>
               <span className={`text-[10px] uppercase tracking-widest font-bold ${isProcessing ? 'text-amber-500' : 'text-emerald-500'}`}>
                 {isProcessing ? 'Processing' : 'Neural Active'}
               </span>
             </div>
           </div>
         </div>
-        <button onClick={onReset} className="p-2 hover:bg-slate-700 rounded-xl transition-colors text-slate-400 group">
-          <i className="fa-solid fa-rotate group-active:rotate-180 transition-transform"></i>
+        <button
+          onClick={onReset}
+          className="p-2 hover:bg-slate-700 rounded-xl transition-colors text-slate-400 group"
+          aria-label="Reset conversation and upload new document"
+          title="Reset conversation"
+        >
+          <i className="fa-solid fa-rotate group-active:rotate-180 transition-transform" aria-hidden="true"></i>
         </button>
       </div>
 
@@ -71,7 +86,7 @@ export const Chat: React.FC<ChatProps> = ({ messages, onSendMessage, onReset, is
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-50 space-y-4">
             <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
-              <i className="fa-regular fa-comment-dots text-3xl text-slate-500"></i>
+              <i className="fa-regular fa-comment-dots text-3xl text-slate-500" aria-hidden="true"></i>
             </div>
             <p className="text-slate-400 max-w-xs text-sm">Brain ready for document extraction.</p>
           </div>
@@ -81,7 +96,9 @@ export const Chat: React.FC<ChatProps> = ({ messages, onSendMessage, onReset, is
 
       <div className="p-4 bg-slate-800/50 border-t border-slate-700">
         <form onSubmit={handleSubmit} className="relative">
+          <label htmlFor="chat-input" className="sr-only">Ask your document a question</label>
           <input
+            id="chat-input"
             ref={inputRef}
             type="text"
             value={input}
@@ -93,11 +110,12 @@ export const Chat: React.FC<ChatProps> = ({ messages, onSendMessage, onReset, is
           <button
             type="submit"
             disabled={!input.trim() || isProcessing}
-            className={`absolute right-2 top-2 bottom-2 w-12 flex items-center justify-center rounded-xl transition-all ${
-              input.trim() && !isProcessing ? 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg' : 'bg-slate-800 text-slate-600'
-            }`}
+            aria-label="Send message"
+            title="Send message"
+            className={`absolute right-2 top-2 bottom-2 w-12 flex items-center justify-center rounded-xl transition-all ${input.trim() && !isProcessing ? 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg' : 'bg-slate-800 text-slate-600'
+              }`}
           >
-            <i className={`fa-solid ${isProcessing ? 'fa-circle-notch animate-spin' : 'fa-paper-plane'}`}></i>
+            <i className={`fa-solid ${isProcessing ? 'fa-circle-notch animate-spin' : 'fa-paper-plane'}`} aria-hidden="true"></i>
           </button>
         </form>
       </div>

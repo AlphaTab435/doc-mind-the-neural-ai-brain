@@ -20,7 +20,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUpload, isLoading }) =
     }
   }, []);
 
-  const processFile = async (file: File) => {
+  const processFile = useCallback(async (file: File) => {
     if (file.type !== 'application/pdf') {
       alert('Please upload a valid PDF file.');
       return;
@@ -37,17 +37,17 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUpload, isLoading }) =
       onUpload(file, base64);
     };
     reader.readAsDataURL(file);
-  };
+  }, [onUpload]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       processFile(e.dataTransfer.files[0]);
     }
-  }, [onUpload]);
+  }, [processFile]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -62,22 +62,25 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUpload, isLoading }) =
       onDragOver={handleDrag}
       onDrop={handleDrop}
       className={`relative h-64 w-full max-w-2xl mx-auto rounded-3xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center cursor-pointer group
-        ${isDragging 
-          ? 'border-emerald-500 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.2)]' 
+        ${isDragging
+          ? 'border-emerald-500 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
           : 'border-slate-700 hover:border-emerald-500/50 bg-slate-800/50'
         }
         ${isLoading ? 'pointer-events-none opacity-50' : ''}`}
     >
+      <label htmlFor="pdf-upload" className="sr-only">Upload PDF document</label>
       <input
+        id="pdf-upload"
         type="file"
         accept=".pdf"
         onChange={handleChange}
+        aria-label="Upload PDF document"
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
       />
-      
+
       <div className="text-center p-6">
         <div className={`mb-4 transition-transform duration-300 group-hover:scale-110 ${isDragging ? 'scale-110 text-emerald-500' : 'text-slate-400 group-hover:text-emerald-400'}`}>
-          <i className="fa-solid fa-cloud-arrow-up text-5xl"></i>
+          <i className="fa-solid fa-cloud-arrow-up text-5xl" aria-hidden="true"></i>
         </div>
         <h3 className="text-xl font-semibold mb-2 text-slate-100">
           {isDragging ? 'Drop your PDF here' : 'Drop your Brain Fuel'}
@@ -93,7 +96,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUpload, isLoading }) =
       {isLoading && (
         <div className="absolute inset-0 bg-slate-900/60 rounded-3xl flex items-center justify-center backdrop-blur-sm">
           <div className="flex flex-col items-center">
-            <div className="w-10 h-10 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" aria-hidden="true"></div>
             <span className="mt-4 text-emerald-400 font-medium animate-pulse">Initializing Neural Link...</span>
           </div>
         </div>
