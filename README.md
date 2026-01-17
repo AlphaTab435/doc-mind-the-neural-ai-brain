@@ -58,6 +58,7 @@ In production (Vercel), API calls are proxied through serverless functions to ke
    Create a `.env` file (see `.env.example`):
    ```env
    VITE_API_KEY=your_gemini_key
+   VITE_ENABLE_SEARCH=true  # Optional: Set to true to enable web search (paid quota required)
    ```
 
 4. **Launch dev server**

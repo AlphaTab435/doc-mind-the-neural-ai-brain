@@ -14,7 +14,7 @@ type VercelResponse = ServerResponse & {
 // Model configuration with fallbacks (tries in order)
 const MODELS = {
   primary: 'gemini-3-flash-preview',
-  fallbacks: ['gemini-2.0-flash-lite', 'gemini-1.5-flash-latest']
+  fallbacks: ['gemini-2.0-flash-lite']
 };
 
 async function tryGenerateContent(apiKey: string, model: string, base64Data: string, mimeType: string) {

@@ -17,7 +17,7 @@ type VercelResponse = ServerResponse & {
 // Model configuration with fallbacks (tries in order)
 const MODELS = {
     primary: 'gemini-3-flash-preview',
-    fallbacks: ['gemini-2.0-flash-lite', 'gemini-1.5-flash-latest']
+    fallbacks: ['gemini-2.0-flash-lite']
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

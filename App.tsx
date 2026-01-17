@@ -45,9 +45,9 @@ const App: React.FC = () => {
 
     try {
       const stream = askQuestionStream(
-        currentDoc.base64, 
-        currentDoc.type, 
-        text, 
+        currentDoc.base64,
+        currentDoc.type,
+        text,
         messages.map(m => ({ role: m.role, content: m.content })),
         useSearch
       );
@@ -89,17 +89,18 @@ const App: React.FC = () => {
             </div>
             <h1 className="text-xl font-bold tracking-tight text-slate-100">DOC<span className="text-emerald-500">MIND</span></h1>
           </div>
-          
+
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setUseSearch(!useSearch)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all text-[10px] font-bold uppercase tracking-widest ${
-                useSearch ? 'bg-blue-500/20 border-blue-500 text-blue-400' : 'bg-slate-800 border-slate-700 text-slate-500'
-              }`}
-            >
-              <i className={`fa-solid ${useSearch ? 'fa-globe' : 'fa-magnifying-glass'}`}></i>
-              {useSearch ? 'Search Active' : 'Search Off'}
-            </button>
+            {import.meta.env.VITE_ENABLE_SEARCH === 'true' && (
+              <button
+                onClick={() => setUseSearch(!useSearch)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all text-[10px] font-bold uppercase tracking-widest ${useSearch ? 'bg-blue-500/20 border-blue-500 text-blue-400' : 'bg-slate-800 border-slate-700 text-slate-500'
+                  }`}
+              >
+                <i className={`fa-solid ${useSearch ? 'fa-globe' : 'fa-magnifying-glass'}`}></i>
+                {useSearch ? 'Search Active' : 'Search Off'}
+              </button>
+            )}
             <div className="px-3 py-1 bg-slate-800 rounded-full border border-slate-700 text-[10px] font-bold text-slate-300 uppercase tracking-widest">Free Tier</div>
           </div>
         </div>
@@ -108,7 +109,7 @@ const App: React.FC = () => {
       <main className="flex-1 max-w-7xl mx-auto w-full p-6 flex flex-col">
         {!currentDoc ? (
           <div className="flex-1 flex flex-col items-center justify-center py-12">
-            <h2 className="text-4xl md:text-6xl font-bold text-slate-100 mb-6 text-center leading-tight">Your Documents,<br/><span className="text-emerald-500">Privately Decoded.</span></h2>
+            <h2 className="text-4xl md:text-6xl font-bold text-slate-100 mb-6 text-center leading-tight">Your Documents,<br /><span className="text-emerald-500">Privately Decoded.</span></h2>
             <FileUpload onUpload={handleFileUpload} isLoading={status === AnalysisStatus.ANALYZING} />
           </div>
         ) : (
