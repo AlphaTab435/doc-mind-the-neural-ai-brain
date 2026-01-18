@@ -18,9 +18,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
+
+    // Security logging for API key verification
     if (!apiKey) {
+        console.error('[API TTS] ⚠️  SECURITY: No API key found in environment');
         return res.status(500).json({ error: 'API key not configured' });
     }
+    console.log('[API TTS] 🔒 API Key verified from ENV');
 
     try {
         const { text } = req.body;
@@ -45,6 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         );
 
         if (!response.ok) {
+            console.error('[API TTS] ❌ Request failed:', response.status);
             const error = await response.text();
             throw new Error(error);
         }
@@ -53,12 +58,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const audioData = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
 
         if (!audioData) {
+            console.error('[API TTS] ❌ No audio data in response');
             return res.status(500).json({ error: 'No audio data received' });
         }
 
+        console.log('[API TTS] ✅ SUCCESS');
         return res.status(200).json({ audio: audioData });
     } catch (error: any) {
-        console.error('TTS error:', error);
+        console.error('[API TTS] Error:', error.message);
         return res.status(500).json({ error: 'Speech generation failed.' });
     }
 }

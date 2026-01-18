@@ -111,6 +111,36 @@ doc-mind-the-neural-ai-brain/
 - **Direct Link**: Encrypted communication between client ↔ serverless ↔ Gemini.
 - **Session Wipe**: Click the reset icon to instantly clear all buffers.
 
+## 📊 Logging & Monitoring
+
+### Console Logging Behavior
+
+**Development Mode** (`npm run dev`):
+- Logs show `[Gemini]` and `[Gemini Stream]` prefixes
+- API calls are made directly from the browser using client-side SDK
+- You'll see logs like:
+  ```
+  [Gemini] 🚀 PRIMARY → gemini-3-flash-preview
+  [Gemini] ✅ gemini-3-flash-preview
+  ```
+
+**Production Mode** (Vercel deployment):
+- Logs show `[API Chat]`, `[API Analyze]`, `[API TTS]` prefixes
+- API calls go through Vercel serverless functions
+- Security logs verify API key configuration:
+  ```
+  [API Chat] 🔒 API Key verified from ENV
+  [API Chat] 🚀 PRIMARY → gemini-3-flash-preview
+  [API Chat] ✅ gemini-3-flash-preview (200)
+  ```
+
+### Log Format
+- 🚀 **PRIMARY**: Using the primary model (gemini-3-flash-preview)
+- 🔄 **FALLBACK**: Switched to backup model due to rate limits
+- ✅ **Success**: Request completed successfully
+- ❌ **Error**: Request failed (with error message)
+- 🔒 **Security**: API key verification status (production only)
+
 ## 🧪 Development
 
 ### Build for Production

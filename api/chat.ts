@@ -26,9 +26,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
+
+    // Security logging for API key verification
     if (!apiKey) {
+        console.error('[API Chat] ⚠️  SECURITY: No API key found in environment');
         return res.status(500).json({ error: 'API key not configured' });
     }
+    console.log('[API Chat] 🔒 API Key verified from ENV');
 
     try {
         const { base64Data, mimeType, question, history, useSearch } = req.body;
@@ -68,7 +72,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         for (let i = 0; i < modelsToTry.length; i++) {
             const model = modelsToTry[i];
             const isPrimary = i === 0;
-            console.log(`[API Chat] ${isPrimary ? '🚀 PRIMARY' : '🔄 FALLBACK #' + i} → Trying: ${model}`);
+            console.log(`[API Chat] ${isPrimary ? '🚀 PRIMARY' : '🔄 FALLBACK #' + i} → ${model}`);
 
             response = await fetch(
                 `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`,
@@ -80,15 +84,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             );
 
             if (response.status !== 429) {
-                console.log(`[API Chat] ✅ SUCCESS → Model: ${model} (Status: ${response.status})`);
+                console.log(`[API Chat] ✅ ${model} (${response.status})`);
                 break;
             }
-            console.log(`[API Chat] ❌ Rate limited (429) → Model: ${model}`);
 
-            if (i < modelsToTry.length - 1) {
-                console.log(`[API Chat] ⏭️ Switching to next fallback...`);
-            } else {
-                console.log(`[API Chat] 💀 All models exhausted!`);
+            console.log(`[API Chat] ❌ Rate limited → ${model}`);
+            if (i === modelsToTry.length - 1) {
+                console.log('[API Chat] 💀 All models exhausted');
             }
         }
 
@@ -134,7 +136,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         res.write('data: [DONE]\n\n');
         return res.end();
     } catch (error: any) {
-        console.error('Chat error:', error);
+        console.error('[API Chat] Error:', error.message);
         res.write(`data: ${JSON.stringify({ error: 'Neural link interrupted.' })}\n\n`);
         return res.end();
     }

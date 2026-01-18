@@ -41,9 +41,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
+
+  // Security logging for API key verification
   if (!apiKey) {
+    console.error('[API Analyze] ⚠️  SECURITY: No API key found in environment');
     return res.status(500).json({ error: 'API key not configured' });
   }
+  console.log('[API Analyze] 🔒 API Key verified from ENV');
 
   try {
     const { base64Data, mimeType } = req.body;
@@ -55,20 +59,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     for (let i = 0; i < modelsToTry.length; i++) {
       const model = modelsToTry[i];
       const isPrimary = i === 0;
-      console.log(`[API Analyze] ${isPrimary ? '🚀 PRIMARY' : '🔄 FALLBACK #' + i} → Trying: ${model}`);
+      console.log(`[API Analyze] ${isPrimary ? '🚀 PRIMARY' : '🔄 FALLBACK #' + i} → ${model}`);
 
       response = await tryGenerateContent(apiKey, model, base64Data, mimeType);
 
       if (response.status !== 429) {
-        console.log(`[API Analyze] ✅ SUCCESS → Model: ${model} (Status: ${response.status})`);
+        console.log(`[API Analyze] ✅ ${model} (${response.status})`);
         break;
       }
-      console.log(`[API Analyze] ❌ Rate limited (429) → Model: ${model}`);
 
-      if (i < modelsToTry.length - 1) {
-        console.log(`[API Analyze] ⏭️ Switching to next fallback...`);
-      } else {
-        console.log(`[API Analyze] 💀 All models exhausted!`);
+      console.log(`[API Analyze] ❌ Rate limited → ${model}`);
+      if (i === modelsToTry.length - 1) {
+        console.log('[API Analyze] 💀 All models exhausted');
       }
     }
 
@@ -83,7 +85,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     return res.status(200).json({ text });
   } catch (error: any) {
-    console.error('Analyze error:', error);
+    console.error('[API Analyze] Error:', error.message);
     return res.status(500).json({ error: 'Analysis failed.' });
   }
 }

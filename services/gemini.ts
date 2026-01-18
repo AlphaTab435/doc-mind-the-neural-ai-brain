@@ -90,7 +90,7 @@ export const analyzeDocument = async (base64Data: string, mimeType: string): Pro
       const model = modelsToTry[i];
       const isPrimary = i === 0;
       try {
-        console.log(`[Gemini] ${isPrimary ? '🚀 PRIMARY' : '🔄 FALLBACK #' + i} → Trying: ${model}`);
+        console.log(`[Gemini] ${isPrimary ? '🚀 PRIMARY' : '🔄 FALLBACK #' + i} → ${model}`);
         const response = await ai.models.generateContent({
           model,
           contents: {
@@ -100,25 +100,22 @@ export const analyzeDocument = async (base64Data: string, mimeType: string): Pro
             ]
           }
         });
-        console.log(`[Gemini] ✅ SUCCESS → Model: ${model}`);
+        console.log(`[Gemini] ✅ ${model}`);
         return response.text || "";
       } catch (error: any) {
         const errorMsg = error.message || 'Unknown error';
         const isRateLimited = errorMsg.includes('429') || errorMsg.includes('quota');
         const hasMoreFallbacks = i < modelsToTry.length - 1;
 
-        console.log(`[Gemini] ❌ FAILED → Model: ${model}`);
-        console.log(`[Gemini]    └─ Error: ${errorMsg.substring(0, 100)}${errorMsg.length > 100 ? '...' : ''}`);
-        console.log(`[Gemini]    └─ Rate Limited: ${isRateLimited} | Has Fallbacks: ${hasMoreFallbacks}`);
+        console.log(`[Gemini] ❌ ${model} - ${errorMsg.substring(0, 80)}${errorMsg.length > 80 ? '...' : ''}`);
 
         if (isRateLimited && hasMoreFallbacks) {
-          console.log(`[Gemini] ⏭️ Switching to next fallback...`);
           continue;
         }
         throw error;
       }
     }
-    console.log(`[Gemini] 💀 ALL MODELS EXHAUSTED!`);
+    console.log('[Gemini] 💀 All models exhausted');
     throw new Error("All models exhausted.");
   }
 };
@@ -204,14 +201,14 @@ export async function* askQuestionStream(
       const model = modelsToTry[i];
       const isPrimary = i === 0;
       try {
-        console.log(`[Gemini Stream] ${isPrimary ? '🚀 PRIMARY' : '🔄 FALLBACK #' + i} → Trying: ${model}`);
+        console.log(`[Gemini Stream] ${isPrimary ? '🚀 PRIMARY' : '🔄 FALLBACK #' + i} → ${model}`);
         const responseStream = await ai.models.generateContentStream({
           model,
           contents,
           config
         });
 
-        console.log(`[Gemini Stream] ✅ SUCCESS → Model: ${model}`);
+        console.log(`[Gemini Stream] ✅ ${model}`);
         for await (const chunk of responseStream) {
           const text = chunk.text;
           if (text) yield text;
@@ -222,12 +219,9 @@ export async function* askQuestionStream(
         const isRateLimited = errorMsg.includes('429') || errorMsg.includes('quota');
         const hasMoreFallbacks = i < modelsToTry.length - 1;
 
-        console.log(`[Gemini Stream] ❌ FAILED → Model: ${model}`);
-        console.log(`[Gemini Stream]    └─ Error: ${errorMsg.substring(0, 100)}${errorMsg.length > 100 ? '...' : ''}`);
-        console.log(`[Gemini Stream]    └─ Rate Limited: ${isRateLimited} | Has Fallbacks: ${hasMoreFallbacks}`);
+        console.log(`[Gemini Stream] ❌ ${model} - ${errorMsg.substring(0, 80)}${errorMsg.length > 80 ? '...' : ''}`);
 
         if (isRateLimited && hasMoreFallbacks) {
-          console.log(`[Gemini Stream] ⏭️ Switching to next fallback...`);
           continue;
         }
         throw error;
